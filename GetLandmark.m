@@ -1,6 +1,6 @@
 % Mark all landmarks down
 % Special for IMDB 
-function MarkLandmarks()
+function GetLandmark()
 
     % Clean up environment
     clear;
@@ -8,21 +8,21 @@ function MarkLandmarks()
     close all;
 
     % Setup environment
+    cd('./');
     gpu = 1;
     gpuID = 7;
     pathMTCNN = '/home/xjch/Desktop/MTCNN_face_detection_alignment-master/code/codes/MTCNNv2';
     pathCaffe = '/home/xjch/Desktop/caffe/matlab';
     pathToolbox = '/home/xjch/Desktop/toolbox-master';
-    pathModels = '/home/xjch/Desktop/MTCNN_face_detection_alignment-master/code/codes/MTCNNv2/mdoel';
+    pathModels = '/home/xjch/Desktop/MTCNN_face_detection_alignment-master/code/codes/MTCNNv2/model';
     addpath(genpath(pathCaffe));
     addpath(genpath(pathToolbox));
     addpath(genpath(pathMTCNN));
 
     %Load data from metadata:
     %imdb.mat
-    load(imdb.mat);
+    load('imdb.mat');
     imgList = imdb.full_path;
-
     % Setup MTCNN
     threshold = [0.6 0.7 0.9];
     factor = 0.85;
@@ -60,31 +60,38 @@ function MarkLandmarks()
     imgZeroFace = [];
     imgMultiFace = [];
     
-    for i = 1 : 2%length(imgList)
+    for i = 1 : length(imgList)
 	    
+        tic;
+
+        % Execute MTCNN FP
         img = imread(imgList{i});
-        [imgPath, imgName, imgExt, imgVer] = fileparts(imgList{i});
-        lmName = [imgName, '_sph_5p.mat'];
-        [BBoxes, landmarks] = 
-            detect_face(img, minsize, PNet, RNet, ONet, LNet, 
+        [imgPath, imgName, ~] = fileparts(imgList{i});
+        lmName = [ imgPath , '/', imgName, '_sph_5p.mat'];
+        [BBoxes, landmarks] = ...
+            detect_face(img, minsize, PNet, RNet, ONet, LNet, ...
                 threshold, false, factor);
-        imgProceeded += 1;
+        imgProceeded = imgProceeded + 1;
 
         % Deal with boundingboxes
-        detected = size(boundingboxes, 1);
-        faceDetected += detected;
+        detected = size(BBoxes, 1);
+        faceDetected = faceDetected + detected;
         
         % Deal with landmarks
         if detected == 0
             imgZeroFace = [imgZeroFace; imgList{i}];
-        else if detected > 1
-            imgMultiFace = [imgMultiFace; imgList{i}];
         else
-            facial5 = reshape(landmarks, [5, 2]);
-            facial5 = double(facial5);
-            save(lmName, 'facial5');
-        end
+            if detected > 1
+                imgMultiFace = [imgMultiFace; imgList{i}];
+            else
+                facial5point = reshape(landmarks, [5, 2]);
+                save(lmName, 'facial5point');
+            end
     
+        end
+        
+        fprintf('%d th image proceeded.\n', imgProceeded);
+        toc;
     end
 
     %Report
@@ -95,6 +102,7 @@ function MarkLandmarks()
         fprintf('%d images are detected no face.\n', zFaces);
         for j = 1 : zFaces
             fprintf('%s\n', imgZeroFace{j});
+            save('zeroFaces', imgZeroFace);
         end
     end
     
@@ -103,6 +111,7 @@ function MarkLandmarks()
         fprintf('%d images are detected more than one faces.\n', mFaces);
         for j = 1 : mFaces
             fprintf('%s\n', imgMultiFace{j});
+            save('multiFaces', imgMultiFace);
         end
     end
 
