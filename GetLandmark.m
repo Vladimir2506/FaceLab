@@ -82,9 +82,20 @@ function GetLandmark()
             imgZeroFace = [imgZeroFace; imgList{i}];
         else
             if detected > 1
+                largest = 1;
+                maxArea = (BBoxes(1,3) - BBoxes(1,1)) * (BBoxes(1,4) - BBoxes(1,2));
+                for k = 2 : detected
+                    thisArea = (BBoxes(k,3) - BBoxes(k,1)) * (BBoxes(k,4) - BBoxes(k,2));
+                    if thisArea > maxArea
+                        maxArea = thisArea;
+                        largest = k;
+                    end
+                end
+                facial5point = double(reshape(landmarks(5 * largest - 4 : 5 * largest, :), [5, 2]));
+                save(lmName, 'facial5point');
                 imgMultiFace = [imgMultiFace; imgList{i}];
             else
-                facial5point = reshape(landmarks, [5, 2]);
+                facial5point = double(reshape(landmarks, [5, 2]));
                 save(lmName, 'facial5point');
             end
     
