@@ -1,6 +1,6 @@
-% Mark all landmarks down
-% Special for IMDB 
-function GetLandmark()
+% Tell all boxes and facialpoints
+% Special for VGGFace1 
+function GetFPBB()
 
     % Clean up environment
     clear;
@@ -20,9 +20,9 @@ function GetLandmark()
     addpath(genpath(pathMTCNN));
 
     %Load data from metadata:
-    %imdb.mat
-    load('imdb.mat');
-    imgList = imdb.full_path;
+    %imglist.txt
+    imgList = importdata('imglist.txt');
+    
     % Setup MTCNN
     threshold = [0.6 0.7 0.9];
     factor = 0.85;
