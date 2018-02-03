@@ -97,8 +97,7 @@ def preprocess(img, bbox=None, landmark=None, **kwargs):
     assert len(image_size)==2
 
     #src = src[0:3,:]
-    #dst = dst[0:3,:]
-
+    #dst = dst[0:3,:]，
 
     #print(src.shape, dst.shape)
     #print(src)
@@ -111,3 +110,4 @@ def preprocess(img, bbox=None, landmark=None, **kwargs):
     #warped = trans.warp(img, tform3, output_shape=_shape)
     return warped
 
+  
